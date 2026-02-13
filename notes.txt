@@ -36,3 +36,30 @@ Understanding protocols
 Understanding architecture
 Understanding data flow
 Understanding security
+
+# Important Backend Concept
+
+There are 3 main places data can come from in HTTP:
+
+1️⃣ Path parameter
+
+/users/5
+
+
+2️⃣ Query parameter
+
+/users?id=5
+
+
+3️⃣ Request body
+
+POST with JSON
+
+# swagger 
+    http://127.0.0.1:8000/docs
+
+
+# curl to send the post request 
+    curl -X POST "http://127.0.0.1:8000/data" \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Sir","age":20}'
