@@ -1,0 +1,38 @@
+What is a server?
+What is a client?
+What is IP address?
+What is DNS?
+What is HTTP?
+What is HTTPS?
+What is a port?
+What is TCP vs UDP?
+
+very important topic 
+
+TCP (Transmission Control Protocol)
+Reliable
+Ordered
+Used by HTTP
+
+⚡ UDP
+Faster
+Not reliable
+Used in gaming, streaming
+Backend mostly uses TCP.
+
+# new conceptes 
+    reverse proxy
+    ASGI server
+
+# Important Mindset Shift
+
+Backend is NOT:
+
+Just writing APIs
+
+Backend IS:
+Understanding network
+Understanding protocols
+Understanding architecture
+Understanding data flow
+Understanding security
