@@ -1,16 +1,37 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Security
 
 from .database import engine, SessionLocal
 from .models import Base, User
 from .schemas import UserCreate, UserLogin
+from .auth import create_access_token, verify_token
+
+
 
 app = FastAPI()
+security = HTTPBearer()
+
 
 Base.metadata.create_all(bind=engine)
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Security(security)
+):
+    token = credentials.credentials
+
+    payload = verify_token(token)
+
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    return payload["sub"]
+
 
 # Dependency to get DB session
 def get_db():
@@ -52,4 +73,11 @@ def signin(user: UserLogin, db: Session = Depends(get_db)):
     if not pwd_context.verify(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return {"message": "Login successful"}
+    access_token = create_access_token(
+        data={"sub": db_user.username}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
