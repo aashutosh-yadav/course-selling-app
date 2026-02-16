@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Dashboard</h2>
+
+<button onclick="getProfile()">Get My Profile</button>
+<button onclick="logout()">Logout</button>
+<button onclick="goToCreate()">Create Post</button>
+
+<p id="result"></p>
+
+<script>
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+function goToCreate() {
+    window.location.href = "create-post.html";
+}
+
+async function getProfile() {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch("http://127.0.0.1:8000/me", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const data = await response.json();
+    document.getElementById("result").innerText = JSON.stringify(data);
+}
+</script>
+
+</body>
+</html>

@@ -3,16 +3,25 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Security
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from .database import engine, SessionLocal
 from .models import Base, User
 from .schemas import UserCreate, UserLogin
 from .auth import create_access_token, verify_token
 
-
-
 app = FastAPI()
 security = HTTPBearer()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 Base.metadata.create_all(bind=engine)

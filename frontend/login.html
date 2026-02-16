@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Login</h2>
+
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<p id="result"></p>
+
+<script>
+async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const response = await fetch("http://127.0.0.1:8000/signin", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "dashboard.html";
+    } else {
+        document.getElementById("result").innerText = "Login failed";
+    }
+}
+</script>
+
+<a href="signup.html">Go to Signup</a>
+
+</body>
+</html>

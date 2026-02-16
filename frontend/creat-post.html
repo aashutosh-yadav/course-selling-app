@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Create Post</h2>
+
+<input id="title" placeholder="Title">
+<textarea id="content" placeholder="Content"></textarea>
+<button onclick="createPost()">Create</button>
+
+<p id="result"></p>
+
+<script>
+async function createPost() {
+    const token = localStorage.getItem("token");
+    const title = document.getElementById("title").value;
+    const content = document.getElementById("content").value;
+
+    const response = await fetch("http://127.0.0.1:8000/posts", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ title, content })
+    });
+
+    const data = await response.json();
+    document.getElementById("result").innerText = JSON.stringify(data);
+}
+</script>
+
+<a href="dashboard.html">Back</a>
+
+</body>
+</html>
