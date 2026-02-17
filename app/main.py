@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from .database import engine, SessionLocal
-from .models import Base, User
-from .schemas import UserCreate, UserLogin
+from .models import Base, User , Post
+from .schemas import UserCreate, UserLogin, PostCreate, PostResponse
 from .auth import create_access_token, verify_token
 
 app = FastAPI()
@@ -94,3 +94,97 @@ def signin(user: UserLogin, db: Session = Depends(get_db)):
 @app.get("/me")
 def read_current_user(current_user: str = Depends(get_current_user)):
     return {"user": current_user}
+
+
+@app.post("/posts", response_model=PostResponse)
+def create_post(
+    post: PostCreate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    # Get user from database
+    db_user = db.query(User).filter(User.username == current_user).first()
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_post = Post(
+        title=post.title,
+        content=post.content,
+        author_id=db_user.id
+    )
+
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+
+    return new_post
+
+@app.get("/posts", response_model=list[PostResponse])
+def get_posts(
+    limit: int = 10,
+    offset: int = 0,
+    db: Session = Depends(get_db)
+):
+    posts = db.query(Post)\
+              .order_by(Post.created_at.desc())\
+              .limit(limit)\
+              .offset(offset)\
+              .all()
+
+    return posts
+
+@app.get("/posts/{post_id}", response_model=PostResponse)
+def get_post(post_id: int, db: Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    return post
+
+@app.put("/posts/{post_id}", response_model=PostResponse)
+def update_post(
+    post_id: int,
+    post_data: PostCreate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    db_user = db.query(User).filter(User.username == current_user).first()
+
+    if post.author_id != db_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed to edit this post")
+
+    post.title = post_data.title
+    post.content = post_data.content
+
+    db.commit()
+    db.refresh(post)
+
+    return post
+
+@app.delete("/posts/{post_id}")
+def delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    db_user = db.query(User).filter(User.username == current_user).first()
+
+    if post.author_id != db_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed to delete this post")
+
+    db.delete(post)
+    db.commit()
+
+    return {"message": "Post deleted successfully"}

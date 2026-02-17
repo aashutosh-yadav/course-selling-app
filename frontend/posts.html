@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>All Blog Posts</h2>
+
+<button onclick="loadPosts()">Refresh</button>
+<button onclick="goToCreate()">Create Post</button>
+
+<div id="posts"></div>
+
+<script>
+function goToCreate() {
+    window.location.href = "create-post.html";
+}
+
+async function loadPosts() {
+    const response = await fetch("http://127.0.0.1:8000/posts");
+    const data = await response.json();
+
+    const container = document.getElementById("posts");
+    container.innerHTML = "";
+
+    data.forEach(post => {
+        container.innerHTML += `
+            <div>
+                <h3>${post.title}</h3>
+                <p>Author ID: ${post.author_id}</p>
+                <button onclick="viewPost(${post.id})">View</button>
+                <button onclick="editPost(${post.id})">Edit</button>
+                <button onclick="deletePost(${post.id})">Delete</button>
+                <hr>
+            </div>
+        `;
+    });
+}
+
+function viewPost(id) {
+    window.location.href = "post.html?id=" + id;
+}
+
+function editPost(id) {
+    window.location.href = "edit-post.html?id=" + id;
+}
+
+async function deletePost(id) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://127.0.0.1:8000/posts/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const data = await response.json();
+    alert(JSON.stringify(data));
+    loadPosts();
+}
+
+loadPosts();
+</script>
+
+</body>
+</html

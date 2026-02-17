@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>View Post</h2>
+
+<div id="post"></div>
+
+<script>
+async function loadPost() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const response = await fetch(`http://127.0.0.1:8000/posts/${id}`);
+    const post = await response.json();
+
+    document.getElementById("post").innerHTML = `
+        <h3>${post.title}</h3>
+        <p>${post.content}</p>
+        <p>Author ID: ${post.author_id}</p>
+    `;
+}
+
+loadPost();
+</script>
+
+</body>
+</html>

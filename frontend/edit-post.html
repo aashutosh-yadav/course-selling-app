@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Edit Post</h2>
+
+<input id="title">
+<textarea id="content"></textarea>
+<button onclick="updatePost()">Update</button>
+
+<script>
+let postId;
+
+async function loadPost() {
+    const params = new URLSearchParams(window.location.search);
+    postId = params.get("id");
+
+    const response = await fetch(`http://127.0.0.1:8000/posts/${postId}`);
+    const post = await response.json();
+
+    document.getElementById("title").value = post.title;
+    document.getElementById("content").value = post.content;
+}
+
+async function updatePost() {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`http://127.0.0.1:8000/posts/${postId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            title: document.getElementById("title").value,
+            content: document.getElementById("content").value
+        })
+    });
+
+    const data = await response.json();
+    alert(JSON.stringify(data));
+    window.location.href = "posts.html";
+}
+
+loadPost();
+</script>
+
+</body>
+</html>
